@@ -1,0 +1,45 @@
+# ============================================================
+# Corpus AI - Python Dependencies
+# ============================================================
+# Install: pip install -r requirements.txt
+# ============================================================
+
+# --- Core API Framework ---
+fastapi>=0.115.0,<1.0.0
+uvicorn[standard]>=0.30.0,<1.0.0
+pydantic>=2.0.0,<3.0.0
+pydantic-settings>=2.0.0,<3.0.0
+
+# --- Database (SQLAlchemy + Drivers) ---
+sqlalchemy>=2.0.0,<3.0.0
+# asyncpg is used for Supabase Postgres in production
+# For local dev, we use SQLite (built-in, no extra driver needed)
+
+# --- Authentication ---
+python-jose[cryptography]>=3.3.0,<4.0.0    # JWT encode/decode
+passlib[bcrypt]>=1.7.0,<2.0.0              # Password hashing
+
+# --- Document Processing ---
+pypdf2>=3.0.0,<4.0.0                       # PDF text extraction
+python-docx>=1.0.0,<2.0.0                  # DOCX text extraction
+langchain-text-splitters>=0.2.0,<1.0.0     # RecursiveCharacterTextSplitter
+
+# --- RAG Pipeline ---
+chromadb>=0.5.0,<1.0.0                     # Vector database
+sentence-transformers>=2.7.0,<3.0.0        # Embedding model (all-MiniLM-L6-v2)
+ollama>=0.3.0,<1.0.0                       # Ollama Python client (local LLM)
+
+# --- Task Queue ---
+celery[redis]>=5.4.0,<6.0.0               # Background workers + Redis broker
+
+# --- Cache ---
+redis>=5.0.0,<6.0.0                        # Redis client
+
+# --- Frontend ---
+streamlit>=1.37.0,<2.0.0                   # Streamlit UI framework
+requests>=2.31.0,<3.0.0                    # HTTP client for API calls
+plotly>=5.0.0,<6.0.0                       # Dashboard charts
+
+# --- Utilities ---
+python-multipart>=0.0.7,<1.0.0            # File uploads in FastAPI
+python-dotenv>=1.0.0,<2.0.0               # .env file loading
