@@ -63,3 +63,11 @@ htmlcov/
 # --- Misc ---
 *.bak
 *.tmp
+
+# --- Documentation ---
+docs/
+*.prd
+*.trd
+PRD.md
+TRD.md
+
