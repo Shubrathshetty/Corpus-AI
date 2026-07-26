@@ -2,9 +2,12 @@
 Corpus AI - Workspace Settings
 ================================
 Manage company workspace and invite employees.
+Restricted to Company Administrators.
 """
 
 import streamlit as st
+import pandas as pd
+from datetime import datetime
 from frontend.components.auth import check_auth_or_redirect
 from frontend.components.sidebar import draw_sidebar
 from frontend.utils.api_client import CorpusAPIClient
@@ -54,11 +57,28 @@ st.divider()
 # ---- Section 2: Team Members ----
 st.subheader("👥 Active Team Members")
 
-import pandas as pd
-team_data = {
-    "Name": ["Sarah Chen", "Raj Kumar", "Alice Wong"],
-    "Email": ["sarah@acme.com", "raj@acme.com", "alice@acme.com"],
-    "Role": ["Admin", "Member", "Member"],
-    "Joined Date": ["2026-07-01", "2026-07-05", "2026-07-10"]
-}
-st.dataframe(pd.DataFrame(team_data), use_container_width=True)
+with st.spinner("Loading team listing..."):
+    res_users = api_client.list_users(st.session_state.access_token)
+
+if res_users["success"]:
+    users = res_users["data"]["users"]
+    team_list = []
+    for u in users:
+        # Convert created_at ISO string to display format
+        try:
+            dt = datetime.fromisoformat(u["created_at"].replace("Z", "+00:00"))
+            joined_str = dt.strftime("%b %d, %Y")
+        except Exception:
+            joined_str = str(u["created_at"])[:10]
+            
+        role_disp = u["role"].replace("_", " ").title()
+        team_list.append({
+            "Name": u["name"],
+            "Email": u["email"],
+            "Role": role_disp,
+            "Joined Date": joined_str
+        })
+    
+    st.dataframe(pd.DataFrame(team_list), use_container_width=True, hide_index=True)
+else:
+    st.error(f"Failed to load team list: {res_users['error']['message']}")
