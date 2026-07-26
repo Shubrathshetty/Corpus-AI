@@ -23,11 +23,12 @@ from frontend.components.auth import init_auth_state
 init_auth_state()
 
 # Configure page paths (relative to root workspace directory)
-login_page = st.Page("frontend/pages/1_🔐_Login.py", title="Access Portal", icon="🔐")
-chat_page = st.Page("frontend/pages/2_💬_Chat.py", title="Chat Q&A", icon="💬")
-docs_page = st.Page("frontend/pages/3_📄_Documents.py", title="Documents", icon="📄")
-dash_page = st.Page("frontend/pages/4_📊_Dashboard.py", title="Dashboard", icon="📊")
-settings_page = st.Page("frontend/pages/5_⚙️_Settings.py", title="Settings", icon="⚙️")
+login_page = st.Page("frontend/pages/Login.py", title="Access Portal", icon="🔐")
+chat_page = st.Page("frontend/pages/Chat.py", title="Chat Q&A", icon="💬")
+docs_page = st.Page("frontend/pages/Documents.py", title="Documents", icon="📄")
+dash_page = st.Page("frontend/pages/Dashboard.py", title="Dashboard", icon="📊")
+settings_page = st.Page("frontend/pages/Settings.py", title="Settings", icon="⚙️")
+
 
 # ---- Dynamic Route Selection ----
 if not st.session_state.authenticated:

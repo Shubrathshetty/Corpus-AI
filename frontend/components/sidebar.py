@@ -39,13 +39,14 @@ def draw_sidebar() -> None:
 
         # ---- Navigation ----
         st.markdown("### 🧭 Navigation")
-        st.page_link("pages/2_💬_Chat.py", label="Chat Q&A", icon="💬")
-        st.page_link("pages/3_📄_Documents.py", label="Documents", icon="📄")
+        st.page_link("pages/Chat.py", label="Chat Q&A", icon="💬")
+        st.page_link("pages/Documents.py", label="Documents", icon="📄")
         
         # Admin-only pages
         if user.get("role") in ["admin", "super_admin"]:
-            st.page_link("pages/4_📊_Dashboard.py", label="Dashboard", icon="📊")
-            st.page_link("pages/5_⚙️_Settings.py", label="Settings", icon="⚙️")
+            st.page_link("pages/Dashboard.py", label="Dashboard", icon="📊")
+            st.page_link("pages/Settings.py", label="Settings", icon="⚙️")
+
 
         st.divider()
 
