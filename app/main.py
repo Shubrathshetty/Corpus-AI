@@ -159,13 +159,23 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 # ---- Register Routers ----
 # Import routers here (not at top) to avoid circular imports
-from app.routers import auth_router, health_router  # noqa: E402
+from app.routers import auth_router, health_router, document_router, chat_router, dashboard_router  # noqa: E402
 
 # Auth routes: /api/v1/auth/*
 app.include_router(auth_router.router, prefix=settings.API_V1_PREFIX)
 
 # Health check: /api/v1/health
 app.include_router(health_router.router, prefix=settings.API_V1_PREFIX)
+
+# Documents: /api/v1/documents/*
+app.include_router(document_router.router, prefix=settings.API_V1_PREFIX)
+
+# Chat: /api/v1/chat/*
+app.include_router(chat_router.router, prefix=settings.API_V1_PREFIX)
+
+# Dashboard: /api/v1/dashboard/*
+app.include_router(dashboard_router.router, prefix=settings.API_V1_PREFIX)
+
 
 
 # ---- Root Endpoint ----

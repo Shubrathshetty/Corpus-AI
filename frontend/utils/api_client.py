@@ -231,3 +231,12 @@ class CorpusAPIClient:
     def get_usage_over_time(self, token: str) -> Dict[str, Any]:
         """GET /dashboard/usage"""
         return self._request("GET", "/dashboard/usage", token=token)
+
+    # ============================================================
+    # Users API methods
+    # ============================================================
+
+    def list_users(self, token: str) -> Dict[str, Any]:
+        """GET /auth/users"""
+        return self._request("GET", "/auth/users", token=token)
+

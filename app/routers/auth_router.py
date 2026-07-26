@@ -355,3 +355,35 @@ def get_me(current_user: User = Depends(get_current_user)):
     Used by the frontend to display user info in the sidebar.
     """
     return _build_user_response(current_user)
+
+
+@router.get(
+    "/users",
+    response_model=UserListResponse,
+    summary="Get all users in the company workspace (admin only)",
+)
+def get_users(
+    current_user: User = Depends(require_role("admin", "super_admin")),
+    db: Session = Depends(get_db),
+):
+    """List all registered users inside the tenant company workspace.
+    
+    Enforces tenant separation by filtering with current user's company_id.
+    """
+    try:
+        users = db.query(User).filter(
+            User.company_id == current_user.company_id
+        ).order_by(User.created_at.asc()).all()
+        
+        users_response = [_build_user_response(u) for u in users]
+        return UserListResponse(
+            users=users_response,
+            total=len(users_response)
+        )
+    except Exception as e:
+        logger.error("Failed to query workspace users: %s", e, exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to query database user tables",
+        )
+
