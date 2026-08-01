@@ -31,7 +31,7 @@ if st.session_state.authenticated:
 st.markdown(
     """
     <div style="text-align: center; margin-top: 50px; margin-bottom: 30px;">
-        <h1 style="color: #FF4B4B; font-size: 42px; margin-bottom: 0;">🧠 Corpus AI</h1>
+        <h1 style="color: #FF4B4B; font-size: 42px; margin-bottom: 0;">Corpus AI</h1>
         <p style="color: #888; font-size: 18px;">Your company's internal knowledge assistant</p>
     </div>
     """,
