@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  api:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: corpus_api
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:////app/data/corpus_ai.db
+      - REDIS_URL=redis://redis:6379/0
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - CHROMA_PERSIST_DIR=/app/data/chroma
+      - UPLOAD_DIR=/app/data/uploads
+    volumes:
+      - corpus_data:/app/data
+    depends_on:
+      - redis
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: corpus_worker
+    command: ["celery", "-A", "app.worker.celery_app", "worker", "--loglevel=info"]
+    environment:
+      - DATABASE_URL=sqlite:////app/data/corpus_ai.db
+      - REDIS_URL=redis://redis:6379/0
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - CHROMA_PERSIST_DIR=/app/data/chroma
+      - UPLOAD_DIR=/app/data/uploads
+    volumes:
+      - corpus_data:/app/data
+    depends_on:
+      - redis
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend.Dockerfile
+    container_name: corpus_frontend
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://api:8000/api/v1
+    depends_on:
+      - api
+
+  redis:
+    image: redis:7-alpine
+    container_name: corpus_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  corpus_data:
+  redis_data:

@@ -27,8 +27,9 @@ logger = logging.getLogger("corpus_ai_frontend")
 class CorpusAPIClient:
     """HTTP Client for interacting with the FastAPI backend."""
 
-    def __init__(self, base_url: str = "http://localhost:8000/api/v1"):
-        self.base_url = base_url
+    def __init__(self, base_url: Optional[str] = None):
+        import os
+        self.base_url = base_url or os.getenv("API_URL", "http://localhost:8000/api/v1")
 
     def _get_headers(self, token: Optional[str] = None) -> Dict[str, str]:
         """Generate request headers with optional Bearer token."""
