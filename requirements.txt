@@ -12,8 +12,8 @@ pydantic-settings>=2.0.0,<3.0.0
 
 # --- Database (SQLAlchemy + Drivers) ---
 sqlalchemy>=2.0.0,<3.0.0
-# asyncpg is used for Supabase Postgres in production
-# For local dev, we use SQLite (built-in, no extra driver needed)
+psycopg2-binary>=2.9.9,<3.0.0              # PostgreSQL driver for production (Supabase/Render)
+# For local dev, SQLite is built-in and requires no external driver
 
 # --- Authentication ---
 python-jose[cryptography]>=3.3.0,<4.0.0    # JWT encode/decode

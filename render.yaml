@@ -1,0 +1,58 @@
+# ============================================================
+# Corpus AI - Render.com Blueprint (Infrastructure-as-Code)
+# ============================================================
+# Docs: https://render.com/docs/blueprint-spec
+# ============================================================
+
+services:
+  # ----------------------------------------------------------
+  # 1. FastAPI Backend API Service (Stateless)
+  # ----------------------------------------------------------
+  - type: web
+    name: corpus-ai-api
+    runtime: python
+    plan: free
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: DATABASE_URL
+        sync: false
+        # Point to Supabase PostgreSQL or Render PostgreSQL:
+        # e.g., postgresql://postgres:<password>@db.<project-ref>.supabase.co:5432/postgres
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: CHROMA_PERSIST_DIR
+        value: /tmp/chroma
+      - key: UPLOAD_DIR
+        value: /tmp/uploads
+      - key: REDIS_URL
+        sync: false
+        # Optional: Connect to Upstash Redis or Render Redis:
+        # e.g., redis://default:<password>@<endpoint>:6379/0
+      - key: OLLAMA_BASE_URL
+        sync: false
+        # Optional: Host an Ollama instance or endpoint for cloud reasoning
+      - key: LOG_LEVEL
+        value: INFO
+
+  # ----------------------------------------------------------
+  # 2. Streamlit Multi-Page Frontend Service
+  # ----------------------------------------------------------
+  - type: web
+    name: corpus-ai-frontend
+    runtime: python
+    plan: free
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run frontend/app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: API_URL
+        # In Render, this resolves to the backend service URL or manual env var
+        # e.g., https://corpus-ai-api.onrender.com/api/v1
+        sync: false

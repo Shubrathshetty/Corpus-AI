@@ -6,10 +6,14 @@ Endpoints for querying the RAG pipeline, retrieving chat sessions, and loading c
 
 import time
 import logging
-from typing import Optional
+import hashlib
+import json
+from datetime import datetime, timezone
+from typing import Optional, Dict, Any, List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 import ollama
+import redis as redis_lib
 
 from app.auth import get_current_user
 from app.config import settings
@@ -30,6 +34,68 @@ from app.services.vector_store import vector_store
 logger = logging.getLogger("corpus_ai.chat_router")
 
 router = APIRouter(prefix="/chat", tags=["Chat"])
+
+
+def _get_redis_client() -> Optional[redis_lib.Redis]:
+    """Obtain a Redis client instance with a short timeout. Returns None if unreachable."""
+    try:
+        r = redis_lib.from_url(settings.REDIS_URL, socket_timeout=1, decode_responses=True)
+        r.ping()
+        return r
+    except Exception as e:
+        logger.debug("Redis unavailable for caching/rate-limiting: %s", e)
+        return None
+
+
+def _check_rate_limit(redis_client: Optional[redis_lib.Redis], user_id: str, limit: int) -> bool:
+    """Enforce hourly sliding-window rate limiting per user. Returns False if exceeded."""
+    if not redis_client:
+        return True  # Graceful fallback if Redis is down
+    try:
+        now_hour = datetime.now(timezone.utc).strftime("%Y%m%d%H")
+        key = f"rate_limit:{user_id}:{now_hour}"
+        current = redis_client.incr(key)
+        if current == 1:
+            redis_client.expire(key, 3600)
+        return current <= limit
+    except Exception as e:
+        logger.warning("Error checking rate limit in Redis: %s", e)
+        return True
+
+
+def _get_cached_answer(redis_client: Optional[redis_lib.Redis], company_id: str, question: str) -> Optional[Dict[str, Any]]:
+    """Retrieve cached Q&A response for identical questions within the tenant."""
+    if not redis_client:
+        return None
+    try:
+        q_hash = hashlib.sha256(question.lower().strip().encode()).hexdigest()
+        key = f"chat_cache:{company_id}:{q_hash}"
+        data = redis_client.get(key)
+        if data:
+            return json.loads(data)
+    except Exception as e:
+        logger.warning("Error reading chat cache from Redis: %s", e)
+    return None
+
+
+def _set_cached_answer(
+    redis_client: Optional[redis_lib.Redis],
+    company_id: str,
+    question: str,
+    answer: str,
+    sources: List[Dict[str, Any]],
+    ttl: int = 3600,
+) -> None:
+    """Cache answer and sources for 1 hour to reduce redundant LLM calls."""
+    if not redis_client:
+        return
+    try:
+        q_hash = hashlib.sha256(question.lower().strip().encode()).hexdigest()
+        key = f"chat_cache:{company_id}:{q_hash}"
+        payload = {"answer": answer, "sources": sources}
+        redis_client.setex(key, ttl, json.dumps(payload))
+    except Exception as e:
+        logger.warning("Error writing chat cache to Redis: %s", e)
 
 
 @router.post(
@@ -79,6 +145,60 @@ def query_chat(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Chat session not found or access denied",
             )
+
+    redis_client = _get_redis_client()
+
+    # Rate limiting: Maximum queries per hour per user
+    if not _check_rate_limit(redis_client, current_user.id, settings.RATE_LIMIT_PER_HOUR):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Rate limit exceeded. Maximum {settings.RATE_LIMIT_PER_HOUR} queries per hour allowed.",
+        )
+
+    # Check cache for recent/frequent identical questions in this tenant
+    cached = _get_cached_answer(redis_client, current_user.company_id, question)
+    if cached:
+        latency_ms = max(1, int((time.time() - start_time) * 1000))
+        cached_answer = cached.get("answer", "")
+        cached_sources = [Source(**s) for s in cached.get("sources", [])]
+
+        user_msg = ChatMessage(session_id=session_id, role="user", content=question)
+        assistant_msg = ChatMessage(
+            session_id=session_id,
+            role="assistant",
+            content=cached_answer,
+            sources=[s.model_dump() for s in cached_sources],
+            metadata_={
+                "latency_ms": latency_ms,
+                "model": settings.OLLAMA_MODEL,
+                "cached": True,
+            },
+        )
+        db.add(user_msg)
+        db.add(assistant_msg)
+
+        query_log = QueryLog(
+            company_id=current_user.company_id,
+            user_id=current_user.id,
+            question=question,
+            latency_ms=latency_ms,
+            cache_hit=True,
+            top_score=cached_sources[0].relevance_score if cached_sources else None,
+        )
+        db.add(query_log)
+        db.commit()
+
+        logger.info("Serving answer from Redis cache in %dms", latency_ms)
+        return ChatResponse(
+            answer=cached_answer,
+            sources=cached_sources,
+            session_id=session_id,
+            metadata={
+                "latency_ms": latency_ms,
+                "model": settings.OLLAMA_MODEL,
+                "cached": True,
+            },
+        )
 
     try:
         # 2. Embed the question
@@ -198,6 +318,15 @@ def query_chat(
         db.add(query_log)
         
         db.commit()
+
+        # 9. Cache answer in Redis for 1 hour for subsequent identical queries
+        _set_cached_answer(
+            redis_client=redis_client,
+            company_id=current_user.company_id,
+            question=question,
+            answer=answer,
+            sources=[s.model_dump() for s in sources],
+        )
 
         return ChatResponse(
             answer=answer,
