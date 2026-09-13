@@ -11,7 +11,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Copy requirements file and install dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+
+# Pre-install lightweight CPU-only PyTorch with retries to avoid network packet drops
+RUN pip install --no-cache-dir --retries 5 --default-timeout=1000 "torch==2.3.1" --index-url https://download.pytorch.org/whl/cpu
+
+# Install remaining project dependencies
+RUN pip install --no-cache-dir --default-timeout=1000 -r requirements.txt
 
 # Copy application code
 COPY app/ app/
