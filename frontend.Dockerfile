@@ -9,8 +9,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Install lightweight frontend dependencies directly
-RUN pip install --no-cache-dir --default-timeout=1000 \
+# Install lightweight frontend dependencies directly with aggressive retries
+RUN pip install --no-cache-dir --retries 10 --default-timeout=1000 --index-url https://pypi.org/simple/ "six==1.17.0"
+RUN pip install --no-cache-dir --retries 10 --default-timeout=1000 --index-url https://pypi.org/simple/ \
     "streamlit>=1.37.0,<2.0.0" \
     "requests>=2.31.0,<3.0.0" \
     "plotly>=5.0.0,<6.0.0"
