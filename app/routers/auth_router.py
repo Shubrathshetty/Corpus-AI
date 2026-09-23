@@ -36,8 +36,10 @@ from app.schemas import (
     TokenRefresh,
     TokenResponse,
     UserLogin,
+    UserListResponse,
     UserResponse,
 )
+
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
