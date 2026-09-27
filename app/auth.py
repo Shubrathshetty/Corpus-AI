@@ -24,22 +24,15 @@ This is the OAuth2 pattern used by Google, GitHub, and most modern APIs."
 
 from datetime import datetime, timedelta, timezone
 
+import bcrypt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.db import get_db
 from app.models import User
-
-# ---- Password Hashing ----
-# WHY bcrypt?
-# - Adaptive: cost factor can be increased as hardware gets faster
-# - Salt is built-in: no separate salt storage needed
-# - Industry standard: used by Django, Rails, Spring Boot
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # ---- JWT Bearer Scheme ----
 # This tells FastAPI to look for "Authorization: Bearer <token>" header
@@ -53,22 +46,21 @@ security = HTTPBearer()
 def hash_password(password: str) -> str:
     """Hash a plaintext password using bcrypt.
 
-    The returned hash includes the algorithm, cost factor, salt,
-    and hash — all in one string. Example:
-    $2b$12$LJ3m4ys4Gk8rWJGxN/Y4sO...
+    Truncates to 72 bytes per bcrypt standard to prevent wrap/truncation errors.
     """
-    return pwd_context.hash(password)
+    pw_bytes = password.encode("utf-8")[:72]
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(pw_bytes, salt).decode("utf-8")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify a plaintext password against a bcrypt hash.
-
-    WHY NOT compare hashes directly?
-    bcrypt uses a random salt per hash, so the same password produces
-    different hashes each time. passlib handles the salt extraction
-    and comparison internally.
-    """
-    return pwd_context.verify(plain_password, hashed_password)
+    """Verify a plaintext password against a bcrypt hash."""
+    try:
+        pw_bytes = plain_password.encode("utf-8")[:72]
+        hash_bytes = hashed_password.encode("utf-8")
+        return bcrypt.checkpw(pw_bytes, hash_bytes)
+    except Exception:
+        return False
 
 
 # ============================================================
