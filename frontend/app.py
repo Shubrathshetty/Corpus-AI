@@ -3,21 +3,26 @@ Corpus AI - Streamlit Entry Point
 ==================================
 Uses Streamlit's st.Page and st.navigation to build a clean multi-page app
 with role-based dynamic routing.
-
-WHY THIS ARCHITECTURE?
-1. Clean: Hides page files from standard sidebar menu
-2. Secure: Prevents unauthorized roles from seeing or accessing admin routes
-3. Responsive: Adapts sidebar items immediately upon state changes (e.g. login/logout)
-
-INTERVIEW NOTE:
-"We use Streamlit's new programmatic navigation API. If a user is not logged in,
-only the login page is registered, hiding all application pages. Once logged in,
-regular members see Chat and Docs, while admins also see Dashboard and Settings.
-This implements front-end role-based routing natively."
 """
+
+import sys
+from pathlib import Path
+
+# Ensure root directory is in sys.path
+_root = str(Path(__file__).resolve().parent.parent)
+if _root not in sys.path:
+    sys.path.insert(0, _root)
 
 import streamlit as st
 from frontend.components.auth import init_auth_state
+
+# Global page configuration (must be called before other streamlit commands)
+st.set_page_config(
+    page_title="Corpus AI",
+    page_icon="🧠",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
 
 # Initialize session state variables
 init_auth_state()

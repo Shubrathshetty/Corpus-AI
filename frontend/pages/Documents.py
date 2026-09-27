@@ -4,6 +4,13 @@ Corpus AI - Document Management Page
 Upload, list, and delete company documents with real backend integration.
 """
 
+import sys
+from pathlib import Path
+
+_root = str(Path(__file__).resolve().parent.parent.parent)
+if _root not in sys.path:
+    sys.path.insert(0, _root)
+
 import streamlit as st
 from datetime import datetime
 from frontend.components.auth import check_auth_or_redirect
@@ -12,12 +19,6 @@ from frontend.utils.api_client import CorpusAPIClient
 
 # Protect the page
 check_auth_or_redirect()
-
-st.set_page_config(
-    page_title="Corpus AI - Documents",
-    page_icon="📄",
-    layout="wide",
-)
 
 draw_sidebar()
 api_client = CorpusAPIClient()

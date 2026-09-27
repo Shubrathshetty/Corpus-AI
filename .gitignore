@@ -65,7 +65,8 @@ htmlcov/
 *.tmp
 
 # --- Documentation ---
-docs/
+docs/*
+!docs/obsidian/
 *.prd
 *.trd
 PRD.md

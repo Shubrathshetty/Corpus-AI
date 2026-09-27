@@ -5,6 +5,13 @@ View real system statistics, daily usage graphs, response latency, and popular q
 Restricted to Workspace Administrators.
 """
 
+import sys
+from pathlib import Path
+
+_root = str(Path(__file__).resolve().parent.parent.parent)
+if _root not in sys.path:
+    sys.path.insert(0, _root)
+
 import streamlit as st
 import pandas as pd
 from frontend.components.auth import check_auth_or_redirect
@@ -17,12 +24,6 @@ check_auth_or_redirect()
 if st.session_state.user.get("role") not in ["admin", "super_admin"]:
     st.error("🔒 Access Denied: You must be an administrator to view this page.")
     st.stop()
-
-st.set_page_config(
-    page_title="Corpus AI - Dashboard",
-    page_icon="📊",
-    layout="wide",
-)
 
 draw_sidebar()
 api_client = CorpusAPIClient()

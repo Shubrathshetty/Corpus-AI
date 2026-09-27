@@ -95,14 +95,22 @@ cd Corpus-AI
 # 2. Copy environment file
 cp .env.example .env
 
-# 3. Start all services (API, Worker, Frontend, Redis)
-docker-compose up --build
+# 3. Start all services and launch browser automatically:
+# On Windows (Double-click start.bat or run):
+.\start.bat
+# Or via PowerShell:
+.\start.ps1
+
+# (Alternative) Plain Docker Compose:
+docker compose up -d
 ```
 
 Services will be accessible at:
 - **Streamlit Frontend**: [http://localhost:8501](http://localhost:8501)
 - **FastAPI Backend**: [http://localhost:8000](http://localhost:8000)
 - **Interactive Swagger Docs**: [http://localhost:8000/api/v1/docs](http://localhost:8000/api/v1/docs)
+
+To stop services: run `.\stop.bat` or `docker compose down`
 
 ---
 

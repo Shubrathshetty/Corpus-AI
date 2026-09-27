@@ -9,15 +9,16 @@ WHY THREE TABS?
 - Tab 3 (Join): Employee joins a company using a shared invite code.
 """
 
+import sys
+from pathlib import Path
+
+_root = str(Path(__file__).resolve().parent.parent.parent)
+if _root not in sys.path:
+    sys.path.insert(0, _root)
+
 import streamlit as st
 from frontend.components.auth import login_user, init_auth_state
 from frontend.utils.api_client import CorpusAPIClient
-
-st.set_page_config(
-    page_title="Corpus AI - Access Portal",
-    page_icon="🔐",
-    layout="centered",
-)
 
 api_client = CorpusAPIClient()
 init_auth_state()
@@ -25,7 +26,7 @@ init_auth_state()
 # Redirection check
 if st.session_state.authenticated:
     st.info("Already logged in! Redirecting...")
-    st.switch_page("pages/Chat.py")
+    st.switch_page("frontend/pages/Chat.py")
 
 # Title and branding
 st.markdown(

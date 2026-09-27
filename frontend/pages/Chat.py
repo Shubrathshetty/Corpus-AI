@@ -21,6 +21,13 @@ INTERVIEW NOTE:
   an expensive state machine."
 """
 
+import sys
+from pathlib import Path
+
+_root = str(Path(__file__).resolve().parent.parent.parent)
+if _root not in sys.path:
+    sys.path.insert(0, _root)
+
 import streamlit as st
 from frontend.components.auth import check_auth_or_redirect
 from frontend.components.sidebar import draw_sidebar
@@ -28,12 +35,6 @@ from frontend.utils.api_client import CorpusAPIClient
 
 # ---- Guard: redirect to login if not authenticated ----
 check_auth_or_redirect()
-
-st.set_page_config(
-    page_title="Corpus AI - Chat",
-    page_icon="💬",
-    layout="wide",
-)
 
 draw_sidebar()
 
