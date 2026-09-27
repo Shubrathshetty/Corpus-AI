@@ -26,7 +26,7 @@ init_auth_state()
 # Redirection check
 if st.session_state.authenticated:
     st.info("Already logged in! Redirecting...")
-    st.switch_page("frontend/pages/Chat.py")
+    st.switch_page("pages/Chat.py")
 
 # Title and branding
 st.markdown(

@@ -27,12 +27,12 @@ st.set_page_config(
 # Initialize session state variables
 init_auth_state()
 
-# Configure page paths (relative to root workspace directory)
-login_page = st.Page("frontend/pages/Login.py", title="Access Portal", icon="🔐")
-chat_page = st.Page("frontend/pages/Chat.py", title="Chat Q&A", icon="💬")
-docs_page = st.Page("frontend/pages/Documents.py", title="Documents", icon="📄")
-dash_page = st.Page("frontend/pages/Dashboard.py", title="Dashboard", icon="📊")
-settings_page = st.Page("frontend/pages/Settings.py", title="Settings", icon="⚙️")
+# Configure page paths (relative to THIS script's directory, i.e. frontend/)
+login_page = st.Page("pages/Login.py", title="Access Portal", icon="🔐")
+chat_page = st.Page("pages/Chat.py", title="Chat Q&A", icon="💬")
+docs_page = st.Page("pages/Documents.py", title="Documents", icon="📄")
+dash_page = st.Page("pages/Dashboard.py", title="Dashboard", icon="📊")
+settings_page = st.Page("pages/Settings.py", title="Settings", icon="⚙️")
 
 
 # ---- Dynamic Route Selection ----
