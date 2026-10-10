@@ -4,17 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "8bacce12483e79eb",
+        "id": "db6b98d403900c24",
         "type": "tabs",
         "children": [
           {
-            "id": "b4b751591a0fd626",
+            "id": "64ca3f76c23adfa7",
             "type": "leaf",
             "state": {
-              "type": "graph",
+              "type": "empty",
               "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
+              "icon": "lucide-file",
+              "title": "New tab"
             }
           }
         ]
@@ -75,7 +75,8 @@
               "title": "Bookmarks"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -163,7 +164,8 @@
               "title": "Outline"
             }
           }
-        ]
+        ],
+        "currentTab": 3
       }
     ],
     "direction": "horizontal",
@@ -181,8 +183,19 @@
       "bases:Create new base": false
     }
   },
-  "active": "b4b751591a0fd626",
+  "active": "64ca3f76c23adfa7",
   "lastOpenFiles": [
-    "README.md"
+    "docs/PRD.md",
+    "Untitled.base",
+    "Untitled.canvas",
+    "2026-09-27.md",
+    "docs/obsidian/00 - Corpus AI Map of Content (MOC).md",
+    "docs/obsidian/Docker & Deployment Services.md",
+    "venv/Lib/site-packages/uvicorn-0.52.4.dist-info/licenses/LICENSE.md",
+    "venv/Lib/site-packages/tzdata/zoneinfo/America/Santiago.md",
+    "venv/Lib/site-packages/huggingface_hub/templates/datasetcard_template.md",
+    "README.md",
+    "docs/obsidian/Auth & Multi-Tenancy.md",
+    "docs/obsidian/Frontend & Streamlit UI.md"
   ]
 }
